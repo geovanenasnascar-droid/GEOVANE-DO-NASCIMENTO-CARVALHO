@@ -6,9 +6,10 @@ interface PlanDisplayProps {
   plan: FitnessPlan;
   completedWorkouts: { [day: string]: boolean };
   onToggleComplete: (day: string) => void;
+  onSelectExercise: (exerciseName: string) => void;
 }
 
-const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan, completedWorkouts, onToggleComplete }) => {
+const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan, completedWorkouts, onToggleComplete, onSelectExercise }) => {
   return (
     <div className="space-y-10 md:space-y-12" id="plan-to-export">
       {/* Diet Plan Section */}
@@ -42,7 +43,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan, completedWorkouts, onTo
               <div 
                 key={dailyWorkout.day} 
                 className={`flex flex-col bg-gray-800 p-4 sm:p-5 rounded-lg shadow-md border transition-all duration-300 ${
-                  isCompleted ? 'border-green-500 opacity-90' : 'border-gray-700 hover:border-yellow-500'
+                  isCompleted ? 'border-green-500 opacity-90 animate-glow-green' : 'border-gray-700 hover:border-yellow-500'
                 }`}
               >
                 <div className="flex-grow">
@@ -54,7 +55,13 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan, completedWorkouts, onTo
                     <ul className="space-y-2">
                       {dailyWorkout.exercises.map((exercise) => (
                         <li key={exercise.name} className="flex justify-between items-baseline gap-2">
-                          <span className="flex-1 text-gray-300">{exercise.name}</span>
+                          <button
+                            onClick={() => onSelectExercise(exercise.name)}
+                            className="flex-1 text-left text-gray-300 hover:text-yellow-400 underline-offset-4 hover:underline transition-colors focus:outline-none focus:ring-1 focus:ring-yellow-500 rounded px-1 -mx-1"
+                            aria-label={`Ver instruções para ${exercise.name}`}
+                          >
+                            {exercise.name}
+                          </button>
                           <span className="flex-shrink-0 text-gray-400 text-sm font-mono bg-gray-700 px-2 py-1 rounded">{exercise.sets}x{exercise.reps}</span>
                         </li>
                       ))}

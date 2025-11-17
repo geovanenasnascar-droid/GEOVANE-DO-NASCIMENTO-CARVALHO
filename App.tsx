@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { UserData, FitnessPlan } from './types';
-import { generatePlan } from './services/geminiService';
+import { generatePlan, generateExerciseInstructions } from './services/geminiService';
 import UserInputForm from './components/UserInputForm';
 import PlanDisplay from './components/PlanDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
 import ShareButton from './components/ShareButton';
 import { DumbbellIcon, PdfIcon } from './components/icons';
+import ExerciseModal from './components/ExerciseModal';
 
 const App: React.FC = () => {
   const [plan, setPlan] = useState<FitnessPlan | null>(null);
@@ -14,11 +15,19 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [completedWorkouts, setCompletedWorkouts] = useState<{ [day: string]: boolean }>({});
 
+  // State for exercise instruction modal
+  const [userDifficulty, setUserDifficulty] = useState<UserData['difficulty']>('Beginner');
+  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
+  const [exerciseInstructions, setExerciseInstructions] = useState<string | null>(null);
+  const [isFetchingInstructions, setIsFetchingInstructions] = useState<boolean>(false);
+  const [modalError, setModalError] = useState<string | null>(null);
+
   const handleGeneratePlan = async (userData: UserData) => {
     setIsLoading(true);
     setError(null);
     setPlan(null);
     setCompletedWorkouts({}); // Reset completion status on new plan
+    setUserDifficulty(userData.difficulty); // Store user difficulty for instruction generation
     try {
       const result = await generatePlan(userData);
       setPlan(result);
@@ -35,6 +44,28 @@ const App: React.FC = () => {
       ...prev,
       [day]: !prev[day],
     }));
+  };
+
+  const handleSelectExercise = async (exerciseName: string) => {
+    setSelectedExercise(exerciseName);
+    setIsFetchingInstructions(true);
+    setExerciseInstructions(null);
+    setModalError(null);
+    try {
+      const instructions = await generateExerciseInstructions(exerciseName, userDifficulty);
+      setExerciseInstructions(instructions);
+    } catch (err) {
+      setModalError('Falha ao carregar as instruções. Tente novamente mais tarde.');
+      console.error(err);
+    } finally {
+      setIsFetchingInstructions(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedExercise(null);
+    setExerciseInstructions(null);
+    setModalError(null);
   };
 
 
@@ -137,10 +168,21 @@ const App: React.FC = () => {
                 plan={plan} 
                 completedWorkouts={completedWorkouts} 
                 onToggleComplete={handleToggleWorkoutCompletion}
+                onSelectExercise={handleSelectExercise}
               />
             </div>
           )}
         </main>
+
+        {selectedExercise && (
+          <ExerciseModal
+            exerciseName={selectedExercise}
+            instructions={exerciseInstructions}
+            isLoading={isFetchingInstructions}
+            error={modalError}
+            onClose={handleCloseModal}
+          />
+        )}
       </div>
     </div>
   );

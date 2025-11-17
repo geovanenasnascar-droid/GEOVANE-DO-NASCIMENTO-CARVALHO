@@ -31,6 +31,31 @@
       .animate-fade-in-out {
         animation: fadeInOut 2s ease-in-out forwards;
       }
+      /* General fade-in animation (for plan and modal content) */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+      /* Faster fade-in for modal backdrop */
+      @keyframes fadeInBackdrop {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .animate-fade-in-fast {
+        animation: fadeInBackdrop 0.2s ease-out forwards;
+      }
+      /* Animation for workout completion */
+      @keyframes glow-green {
+        0% { box-shadow: 0 0 0px rgba(74, 222, 128, 0); } /* Corresponds to Tailwind green-400 */
+        50% { box-shadow: 0 0 15px rgba(74, 222, 128, 0.5); }
+        100% { box-shadow: 0 0 0px rgba(74, 222, 128, 0); }
+      }
+      .animate-glow-green {
+        animation: glow-green 0.7s ease-out;
+      }
     </style>
   <script type="importmap">
 {

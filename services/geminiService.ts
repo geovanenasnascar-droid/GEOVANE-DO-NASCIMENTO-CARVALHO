@@ -105,3 +105,32 @@ export const generatePlan = async (userData: UserData): Promise<FitnessPlan> => 
     throw new Error("Failed to parse fitness plan from Gemini response.");
   }
 };
+
+export const generateExerciseInstructions = async (exerciseName: string, difficulty: string): Promise<string> => {
+  const prompt = `
+    Act as an expert fitness coach.
+    Provide clear, step-by-step instructions in Brazilian Portuguese (pt-BR) on how to perform the following exercise: "${exerciseName}".
+    The user's fitness level is "${difficulty}". Tailor the instructions accordingly. 
+    - For a "Beginner", emphasize safety, common mistakes, and suggest simpler variations if applicable.
+    - For an "Intermediate" user, focus on proper form and breathing techniques.
+    - For an "Advanced" user, include tips for progressive overload, increasing intensity, or advanced variations.
+    The instructions should be easy to understand and focus on proper form to prevent injuries.
+    Format the output with clear paragraphs. Use bullet points for steps where appropriate.
+    Do not return JSON or Markdown code fences. Return only the instructional text.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        temperature: 0.5,
+      },
+    });
+    
+    return response.text.trim();
+  } catch (error) {
+    console.error(`Error generating instructions for ${exerciseName}:`, error);
+    throw new Error("Failed to generate exercise instructions from Gemini.");
+  }
+};
